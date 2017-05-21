@@ -184,6 +184,7 @@
             jQuery('#' + data.pieceId).text("")
             jQuery('#' + data.targetId).text("♟")
             jQuery('#' + data.pieceId).removeAttr('style');
+            jQuery('#' + data.pieceId).css("color", "#222222")
 
             if (data.color == 'rgb(255, 255, 255)') {
                 jQuery('#' + data.targetId).css('color', '#FFFFFF');
@@ -315,11 +316,15 @@
             console.log($(this).css('color'))
             if ((myPlayer == playerBlancas && turnBlancas == true && ($(this).css('color') == 'rgb(255, 255, 255)' || $(this).css('color') == 'rgb(34, 34, 34)')) ||
                 (myPlayer == playerNegras && turnNegras == true && ($(this).css('color') == 'rgb(0, 0, 0)' || $(this).css('color') == 'rgb(34, 34, 34)'))) {
-
+                console.log(myPlayer)
+                console.log(turnBlancas)
+                console.log($(this).css('color'))
                 if (selectedPiece && selectedPiece.className) {
                     targetMove = $(this);
                     targetRow = $(this).parent();
                     colorPiece = $(selectedPiece).css("color");
+                    console.log(selectedPiece)
+                    console.log(selectedPiece.className)
 
                     checkAbailability(selectedRow, targetRow)
 
@@ -360,6 +365,7 @@
     }
 
     function checkAbailability(selectedRow, targetRow) {
+        console.log('---sss')
 
         var selectedRowIndex = selectedRow.index()
         var targetRowIndex = targetRow.index()
@@ -381,6 +387,7 @@
                 middleBox = $(middleRow).children()[targetMoveIndex - 1]
             }
             if (middleBox.innerHTML != '') {
+                console.log('---sss')
 
 
                 $(selectedPiece).removeAttr('style');
