@@ -1,28 +1,33 @@
 {
-  "name": "paradoja-game",
-  "version": "1.0.0",
-  "description": "A simple game",
-  "main": "server.js",
-  "dependencies": {
-    "express": "^4.15.2",
-    "socket.io": "^2.0.1"
-  },
-  "devDependencies": {},
-  "scripts": {
-    "test": "test",
-    "start": "node server.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/alcohol4/paradoja.git"
-  },
-  "keywords": [
-    "paradoja"
-  ],
-  "author": "Alco4",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/alcohol4/paradoja/issues"
-  },
-  "homepage": "https://github.com/alcohol4/paradoja#readme"
+    "name": "paradoja-game",
+    "version": "1.0.0",
+    "description": "A simple game",
+    "main": "server.js",
+    "dependencies": {
+        "express": "^4.15.2",
+        "socket.io": "^2.0.1"
+    },
+    "devDependencies": {},
+    "scripts": {
+        "test": "test",
+        "start": "node server.js"
+    },
+    "dependencies": {
+        "express": "*",
+        "node-gyp": "*",
+        "socket.io": "*"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/alcohol4/paradoja.git"
+    },
+    "keywords": [
+        "paradoja"
+    ],
+    "author": "Alco4",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/alcohol4/paradoja/issues"
+    },
+    "homepage": "https://github.com/alcohol4/paradoja#readme"
 }
