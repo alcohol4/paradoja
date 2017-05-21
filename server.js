@@ -3,8 +3,10 @@ var express = require('express'),
 var app = express();
 var server = http.createServer(app);
 var io = require('socket.io').listen(server);
-const port = process.env.PORT || 3000
-
+const PORT = process.env.PORT || 3000
+server.listen(PORT, function() {
+    console.log('server successfully started on port ' + PORT);
+});
 server.listen(4000);
 
 app.get("/", function(req, res) {
