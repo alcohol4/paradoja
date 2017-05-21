@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="Styles.css">
+    <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <div class="row">
+        <div class="col-md-4"></div>
+        <div class="col-md-4">
+            <h1></h1></div>
+        <div class="col-md-4"></div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <div id="chatPage" style="height: 90%; width: 100%;">
+                <div class="row" style="width: 100%">
+                    <div class="col-md-2">
+                    </div>
+                    <div class="col-md-10">
+                        <div class="panel panel-info">
+                            <div id="usersHeader" class="panel-heading"> USUARIOS CONECTADOS </div>
+                            <div id="usersBody" class="panel-body"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="width: 100%">
+                    <div class="col-md-2">
+                    </div>
+                    <div id="chatContainer" class="col-md-10">
+                        <div class="panel panel-primary">
+                            <div id="chatHeader" class="panel-heading"> CHAT </div>
+                            <div id="chatBody" class="panel-body"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="text-align:center;">
+                    <div class="col-md-1">
+                    </div>
+                    <div class="col-md-11">
+                        <form id="sendMessage" class="input-group" style="text-align:center; margin: 0 auto;">
+                            <input id="message" class="form-control input-lg" type="text" style="background-color: #00FFCC">
+                            <button class="btn btn-lg btn-primary" type="submit"> ENVIAR </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="row" style="text-align:center;">
+                <div class="col-md-1">
+                </div>
+                <div id="loginContainer" class="input-group" style="text-align:center; margin:0 auto;">
+                    <input id="nickname" class="form-control input-lg" type="text" placeholder="Introduce tu nickname gato" style="text-align: center">
+                    <button id="setNick" class="btn btn-lg btn-success" type="submit"> ENTRAR </button>
+                </div>
+                <div id="loginError" class="alert fade in alert-danger alert-dismissable" data-dismiss="alert" style="display:none;">
+                    <button id="closeAlert" type="buton" class="close">x</button> No puedes entrar al chat con ese NICK. Ingresa otro
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <table id="tablero">
+                <tr id="8">
+                    <td class='blanca'></td>
+                    <td id="b8">&#9823;</td>
+                    <td class='blanca'></td>
+                    <td id="d8">&#9823;</td>
+                    <td class='blanca'></td>
+                    <td id="f8">&#9823;</td>
+                    <td class='blanca'></td>
+                    <td id="h8">&#9823;</td>
+                </tr>
+                <tr id="7">
+                    <td id="a7">&#9823;</td>
+                    <td class='blanca'></td>
+                    <td id="c7">&#9823;</td>
+                    <td class='blanca'></td>
+                    <td id="e7">&#9823;</td>
+                    <td class='blanca'></td>
+                    <td id="g7">&#9823;</td>
+                    <td class='blanca'></td>
+                </tr>
+                <tr id="6">
+                    <td class='blanca'></td>
+                    <td id="b6"></td>
+                    <td class='blanca'></td>
+                    <td id="d6"></td>
+                    <td class='blanca'></td>
+                    <td id="f6"></td>
+                    <td class='blanca'></td>
+                    <td id="g6"></td>
+                </tr>
+                <tr id="5">
+                    <td id="a5"></td>
+                    <td class='blanca'></td>
+                    <td id="c5"></td>
+                    <td class='blanca'></td>
+                    <td id="e5"></td>
+                    <td class='blanca'></td>
+                    <td id="g5"></td>
+                    <td class='blanca'></td>
+                </tr>
+                <tr id="4">
+                    <td class='blanca'></td>
+                    <td id="b4"></td>
+                    <td class='blanca'></td>
+                    <td id="d4"></td>
+                    <td class='blanca'></td>
+                    <td id="g4"></td>
+                    <td class='blanca'></td>
+                    <td id="i4"></td>
+                </tr>
+                <tr id="3">
+                    <td id="a3"></td>
+                    <td class='blanca'></td>
+                    <td id="c3"></td>
+                    <td class='blanca'></td>
+                    <td id="e3"></td>
+                    <td class='blanca'></td>
+                    <td id="g3"></td>
+                    <td class='blanca'></td>
+                </tr>
+                <tr id="2">
+                    <td class='blanca'></td>
+                    <td id="b2">&#9823;</td>
+                    <td class='blanca'></td>
+                    <td id="d2">&#9823;</td>
+                    <td class='blanca'></td>
+                    <td id="g2">&#9823;</td>
+                    <td class='blanca'></td>
+                    <td id="i2">&#9823;</td>
+                </tr>
+                <tr id="1">
+                    <td id="a1">&#9823;</td>
+                    <td class='blanca'></td>
+                    <td id="c1">&#9823;</td>
+                    <td class='blanca'></td>
+                    <td id="e1">&#9823;</td>
+                    <td class='blanca'></td>
+                    <td id="g1">&#9823;</td>
+                    <td class='blanca'></td>
+                </tr>
+            </table>
+            <br/>
+            <button id="pasarTurno" class="btn btn-lg btn-success" type="submit"> pasar turno </button>
+
+        </div>
+
+
+        <div class="col-md-4">
+            <div id="jugadores" style="display: none;">
+                <button id="setBlancas" class="btn btn-lg btn-success" type="submit"> sentarse </button>
+                <button id="setNegras" class="btn btn-lg btn-success" type="submit"> sentarse </button>
+            </div>
+        </div>
+        <div id="startImg" class='centrar' hidden>
+            <img src='https://calledshotgun.files.wordpress.com/2015/02/duel-font.png' class='centrar'>
+            <img src='http://vignette2.wikia.nocookie.net/alternativesaga/images/d/d7/Dueling_lightsabers.png/revision/latest?cb=20121230013338' class='centrar'>
+        </div>
+        <p id="selected" hidden></p>
+</body>
+<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+
+</html>
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+
+<script>
+    var selectedPiece;
+
+    jQuery(function($) {
+        var socketClient = io.connect();
+        socketClient.on('refresh tablero', function(data) {
+            jQuery('#' + data.pieceId).text("")
+            jQuery('#' + data.targetId).text("♟")
+            jQuery('#' + data.pieceId).removeAttr('style');
+
+            if (data.color == 'rgb(255, 255, 255)') {
+                jQuery('#' + data.targetId).css('color', '#FFFFFF');
+            } else if (data.color == 'rgb(0, 0, 0)') {
+                jQuery('#' + data.targetId).css('color', '#000000');
+            }
+        });
+        var $messageForm = $('#sendMessage');
+        var $messageBox = $('#message');
+        var $chat = $('#chatBody');
+        var $buttonSend = $('#send');
+
+        var $nickForm = $('#setNick');
+        var $nickBox = $('#nickname');
+        var $users = $('#usersBody');
+        var $closeAlert = $('#closeAlert');
+
+        var $setBlancas = $('#setBlancas');
+        var $setNegras = $('#setNegras');
+        var $jugadores = $('#jugadores');
+        var $pasarTurno = $('#pasarTurno');
+        var playerBlancas = false;
+        var playerNegras = false;
+        var turnBlancas;
+        var turnNegras;
+        var validateNegras = false;
+        var validateBlancas = false;
+        var validateNegras = false;
+        var myPlayer;
+
+        $pasarTurno.click(function(e) {
+            e.preventDefault()
+
+            socketClient.emit('cambiar turno')
+
+        })
+
+        socketClient.on('carga variables', function(data) {
+
+            turnBlancas = data.turnBlancas;
+            turnNegras = data.turnNegras;
+            console.log(turnBlancas)
+            console.log(turnNegras)
+        })
+        socketClient.on('setear turno', function(data) {
+            turnBlancas = data.turnBlancas;
+            turnNegras = data.turnNegras;
+            console.log(turnBlancas)
+            console.log(turnNegras)
+        })
+        socketClient.on('empieza el juego', function(data) {
+            $('#startImg').fadeIn('slow').delay(1000).hide(1000);
+        });
+        $nickForm.click(function(e) {
+            e.preventDefault()
+            socketClient.emit('new user', $nickBox.val(), function(data) {
+                if (data) {
+                    $('#loginContainer').hide()
+                    $('#chatPage').show()
+                    $jugadores.show()
+                    myPlayer = $nickBox.val();
+                    socketClient.emit('send message', ($nickBox.val() + ' hola, he entrado al chat!'))
+                } else {
+                    $("loginError").show()
+                }
+            })
+        })
+
+        $closeAlert.click(function(e) {
+            $("#loginError").hide()
+        })
+
+        $setBlancas.click(function(e) {
+            socketClient.emit('set player blancas');
+        })
+        $setNegras.click(function(e) {
+            socketClient.emit('set player negras');
+        })
+        $messageForm.submit(function(e) {
+            e.preventDefault();
+            if ($messageBox.val() != '') socketClient.emit('send message', $messageBox.val());
+            $messageBox.val('');
+        })
+        socketClient.on('player blancas', function(data) {
+            if (data.nick) {
+                playerBlancas = data.nick;
+                $($setBlancas).replaceWith(
+                    "<h2 id='playerBlancas'><img src='http://vignette1.wikia.nocookie.net/mundogaturro/images/8/8b/SILLA_ROSA.png/revision/latest/scale-to-width-down/329?cb=20170304223153&path-prefix=es' height='42' width='42'> " +
+                    data.nick + "</h2>");
+            }
+        })
+        socketClient.on('player negras', function(data) {
+            if (data.nick) {
+                playerNegras = data.nick;
+                $($setNegras).replaceWith(
+                    "<h2 id='playerNegras'><img src='http://vignette1.wikia.nocookie.net/mundogaturro/images/8/8b/SILLA_ROSA.png/revision/latest/scale-to-width-down/329?cb=20170304223153&path-prefix=es' height='42' width='42'> " +
+                    data.nick + "</h2>");
+            }
+        })
+        socketClient.on('new message', function(data) {
+            $chat.append('<b>' + data.nick + ":</b> " + data.msg + "<br/>");
+        })
+        socketClient.on('usernames', function(data) {
+            var html = '';
+            for (var username in data) {
+                html += username + '<br/>';
+            }
+            $users.html(html);
+        })
+
+        socketClient.on('check player blancas', function(data) {
+            validateBlancas = data;
+        });
+        socketClient.on('check player negras', function(data) {
+            validateNegras = data;
+        });
+        socketClient.emit('validate player blancas', playerBlancas);
+        socketClient.emit('validate player negras', playerNegras);
+
+        $("#tablero td").click(function() {
+            console.log(myPlayer)
+            console.log('---')
+            console.log("negras" + playerNegras)
+            console.log("blancas" + playerBlancas)
+
+            console.log(myPlayer)
+            console.log(turnBlancas)
+            console.log(turnNegras)
+            console.log($(this).css('color'))
+            if ((myPlayer == playerBlancas && turnBlancas == true && ($(this).css('color') == 'rgb(255, 255, 255)' || $(this).css('color') == 'rgb(34, 34, 34)')) ||
+                (myPlayer == playerNegras && turnNegras == true && ($(this).css('color') == 'rgb(0, 0, 0)' || $(this).css('color') == 'rgb(34, 34, 34)'))) {
+
+                if (selectedPiece && selectedPiece.className) {
+                    targetMove = $(this);
+                    targetRow = $(this).parent();
+                    colorPiece = $(selectedPiece).css("color");
+
+                    checkAbailability(selectedRow, targetRow)
+
+                }
+                $(selectedPiece).removeClass("td_clicked")
+
+                selectedPiece = $(this)[0];
+                $("#tablero tr").each(function(indexTr) {
+                    $(this).children("td").each(function(indexTd) {
+                        if ($(this)[0].className) {} else if (!$(selectedPiece).className && $(selectedPiece).text() != '') {
+                            selectedRow = $(selectedPiece).parent();
+                            $(selectedPiece).addClass("td_clicked");
+
+                        };
+                    })
+                })
+            }
+        });
+    })
+    var players = [];
+
+    var targetMove;
+    var selectedRow;
+    var targetRow;
+    var nextRow;
+    var secondMove = false;
+    var lockPiece;
+    var timeTurno = false;
+    var socketClient = io.connect();
+    this.socketClient.on('setear turno', function(data) {
+
+    })
+
+
+
+    function timeturnoFalse() {
+        timeTurno = false;
+    }
+
+    function checkAbailability(selectedRow, targetRow) {
+
+        var selectedRowIndex = selectedRow.index()
+        var targetRowIndex = targetRow.index()
+        var targetMoveIndex = targetMove.index()
+
+        if ($(targetMove)[0].className == 'blanca') {
+            return false;
+        }
+        if ((targetRowIndex - selectedRowIndex == 2 || targetRowIndex - selectedRowIndex == -2) && targetMove.text() != '♟') {
+            var middleBox;
+            if (targetRowIndex - selectedRowIndex == 2) {
+                middleRow = selectedRow.parent().children()[selectedRowIndex + 1];
+            } else if (targetRowIndex - selectedRowIndex == -2) {
+                middleRow = selectedRow.parent().children()[selectedRowIndex - 1];
+            }
+            if (targetMoveIndex - $(selectedPiece).index() == -2) {
+                middleBox = $(middleRow).children()[targetMoveIndex + 1]
+            } else if (targetMoveIndex - $(selectedPiece).index() == 2) {
+                middleBox = $(middleRow).children()[targetMoveIndex - 1]
+            }
+            if (middleBox.innerHTML != '') {
+
+
+                $(selectedPiece).removeAttr('style');
+
+                idMovits = {
+                    "pieceId": selectedPiece.id,
+                    "targetId": targetMove.attr('id'),
+                    "color": colorPiece
+                }
+
+
+                this.socketClient.emit('update tablero', idMovits);
+
+
+            }
+        }
+        if (secondMove == false) {
+            var difIndex = targetMoveIndex - $(selectedPiece).index();
+            if ((targetRowIndex - selectedRowIndex == 1 || targetRowIndex - selectedRowIndex == -1) && (difIndex == 1 || difIndex == -1) && targetMove.text() != '♟') {
+                colorPiece = $(selectedPiece).css("color");
+                $(selectedPiece).removeAttr('style');
+                idMovits = {
+                    "pieceId": selectedPiece.id,
+                    "targetId": targetMove.attr('id'),
+                    "color": colorPiece
+                }
+
+                this.socketClient.emit('update tablero', idMovits);
+
+
+
+            }
+        }
+
+    }
+</script>
