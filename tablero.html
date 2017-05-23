@@ -16,7 +16,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 
-<body>
+<body background="https://media.tenor.co/images/d75e2c72a68d41c3d2955e7f912d3b19/tenor.gif">
     <div class="row">
         <div class="col-md-4"></div>
         <div class="col-md-4">
@@ -70,6 +70,14 @@
             </div>
         </div>
         <div class="col-md-4">
+            <br/>
+            <br/>
+            <div>
+                <h1 id="reloj"><img src="https://cdn4.iconfinder.com/data/icons/azullustre-mayosoft/AzulLustre_icons/256/Reloj_arena.png" width='50' height='50' alt="">
+  <span id='tiempo'>5</span></h1>
+            </div>
+            <br/>
+            <br/>
             <table id="tablero">
                 <tr id="8">
                     <td class='blanca'></td>
@@ -169,6 +177,7 @@
             <img src='http://vignette2.wikia.nocookie.net/alternativesaga/images/d/d7/Dueling_lightsabers.png/revision/latest?cb=20121230013338' class='centrar'>
         </div>
         <p id="selected" hidden></p>
+
 </body>
 <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
 
@@ -176,8 +185,11 @@
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 
 <script>
-    var selectedPiece;
+    var $reloj = $('#reloj');
+    var restante;
 
+
+    var selectedPiece;
     jQuery(function($) {
         var socketClient = io.connect();
         socketClient.on('refresh tablero', function(data) {
@@ -196,12 +208,10 @@
         var $messageBox = $('#message');
         var $chat = $('#chatBody');
         var $buttonSend = $('#send');
-
         var $nickForm = $('#setNick');
         var $nickBox = $('#nickname');
         var $users = $('#usersBody');
         var $closeAlert = $('#closeAlert');
-
         var $setBlancas = $('#setBlancas');
         var $setNegras = $('#setNegras');
         var $jugadores = $('#jugadores');
@@ -214,7 +224,16 @@
         var validateBlancas = false;
         var validateNegras = false;
         var myPlayer;
-
+        var players = [];
+        var targetMove;
+        var selectedRow;
+        var targetRow;
+        var nextRow;
+        var secondMove = false;
+        var lockPiece;
+        var timeTurno = false;
+        var socketClient = io.connect();
+        var ableReloj = true;
         $pasarTurno.click(function(e) {
             e.preventDefault()
 
@@ -241,6 +260,8 @@
         $nickForm.click(function(e) {
             e.preventDefault()
             socketClient.emit('new user', $nickBox.val(), function(data) {
+                console.log('$nickBox.val()')
+
                 if (data) {
                     $('#loginContainer').hide()
                     $('#chatPage').show()
@@ -294,7 +315,6 @@
             }
             $users.html(html);
         })
-
         socketClient.on('check player blancas', function(data) {
             validateBlancas = data;
         });
@@ -303,19 +323,17 @@
         });
         socketClient.emit('validate player blancas', playerBlancas);
         socketClient.emit('validate player negras', playerNegras);
-
         $("#tablero td").click(function() {
-            console.log(myPlayer)
-            console.log('---')
-            console.log("negras" + playerNegras)
-            console.log("blancas" + playerBlancas)
-
-            console.log(myPlayer)
-            console.log(turnBlancas)
-            console.log(turnNegras)
-            console.log($(this).css('color'))
-            if ((myPlayer == playerBlancas && turnBlancas == true && ($(this).css('color') == 'rgb(255, 255, 255)' || $(this).css('color') == 'rgb(34, 34, 34)')) ||
-                (myPlayer == playerNegras && turnNegras == true && ($(this).css('color') == 'rgb(0, 0, 0)' || $(this).css('color') == 'rgb(34, 34, 34)'))) {
+            console.log(myPlayer);
+            console.log('-- -');
+            console.log("negras" + playerNegras);
+            console.log("blancas" + playerBlancas);
+            console.log(myPlayer);
+            console.log(turnBlancas);
+            console.log(turnNegras);
+            console.log($(this).css('color'));
+            if ((myPlayer == playerBlancas && turnBlancas == true && ($(this).css('color') == 'rgb(255, 255, 255)' || $(this).css('color') == 'rgb(34, 34, 34)')) || (myPlayer == playerNegras &&
+                    turnNegras == true && ($(this).css('color') == 'rgb(0, 0, 0)' || $(this).css('color') == 'rgb(34, 34, 34)'))) {
                 console.log(myPlayer)
                 console.log(turnBlancas)
                 console.log($(this).css('color'))
@@ -325,88 +343,96 @@
                     colorPiece = $(selectedPiece).css("color");
                     console.log(selectedPiece)
                     console.log(selectedPiece.className)
-
                     checkAbailability(selectedRow, targetRow)
-
                 }
                 $(selectedPiece).removeClass("td_clicked")
-
                 selectedPiece = $(this)[0];
                 $("#tablero tr").each(function(indexTr) {
                     $(this).children("td").each(function(indexTd) {
                         if ($(this)[0].className) {} else if (!$(selectedPiece).className && $(selectedPiece).text() != '') {
                             selectedRow = $(selectedPiece).parent();
                             $(selectedPiece).addClass("td_clicked");
-
                         };
                     })
                 })
             }
         });
-    })
-    var players = [];
-
-    var targetMove;
-    var selectedRow;
-    var targetRow;
-    var nextRow;
-    var secondMove = false;
-    var lockPiece;
-    var timeTurno = false;
-    var socketClient = io.connect();
-    this.socketClient.on('setear turno', function(data) {
-
-    })
+        socketClient.on('setear turno', function(data) {
 
 
+        })
 
-    function timeturnoFalse() {
-        timeTurno = false;
-    }
 
-    function checkAbailability(selectedRow, targetRow) {
-        console.log('---sss')
+        function timeTurno() {
 
-        var selectedRowIndex = selectedRow.index()
-        var targetRowIndex = targetRow.index()
-        var targetMoveIndex = targetMove.index()
-
-        if ($(targetMove)[0].className == 'blanca') {
-            return false;
         }
-        if ((targetRowIndex - selectedRowIndex == 2 || targetRowIndex - selectedRowIndex == -2) && targetMove.text() != '♟') {
-            var middleBox;
-            if (targetRowIndex - selectedRowIndex == 2) {
-                middleRow = selectedRow.parent().children()[selectedRowIndex + 1];
-            } else if (targetRowIndex - selectedRowIndex == -2) {
-                middleRow = selectedRow.parent().children()[selectedRowIndex - 1];
+
+        function checkAbailability(selectedRow, targetRow) {
+            var selectedRowIndex = selectedRow.index()
+            var targetRowIndex = targetRow.index()
+            var targetMoveIndex = targetMove.index()
+            if ($(targetMove)[0].className == 'blanca') {
+                return false;
             }
-            if (targetMoveIndex - $(selectedPiece).index() == -2) {
-                middleBox = $(middleRow).children()[targetMoveIndex + 1]
-            } else if (targetMoveIndex - $(selectedPiece).index() == 2) {
-                middleBox = $(middleRow).children()[targetMoveIndex - 1]
-            }
-            if (middleBox.innerHTML != '') {
-                console.log('---sss')
-
-
-                $(selectedPiece).removeAttr('style');
-
-                idMovits = {
-                    "pieceId": selectedPiece.id,
-                    "targetId": targetMove.attr('id'),
-                    "color": colorPiece
-                }
-
-
-                this.socketClient.emit('update tablero', idMovits);
-
-
-            }
-        }
-        if (secondMove == false) {
             var difIndex = targetMoveIndex - $(selectedPiece).index();
-            if ((targetRowIndex - selectedRowIndex == 1 || targetRowIndex - selectedRowIndex == -1) && (difIndex == 1 || difIndex == -1) && targetMove.text() != '♟') {
+            if ((targetRowIndex - selectedRowIndex == 2 || targetRowIndex -
+                    selectedRowIndex == -2) && targetMove.text() != '♟') {
+                var middleBox;
+                if (targetRowIndex - selectedRowIndex == 2) {
+                    middleRow = selectedRow.parent().children()[selectedRowIndex + 1];
+                } else if (targetRowIndex - selectedRowIndex == -2) {
+                    middleRow = selectedRow.parent().children()[selectedRowIndex - 1];
+                }
+                if (targetMoveIndex - $(selectedPiece).index() == -2) {
+                    middleBox = $(middleRow).children()[targetMoveIndex + 1]
+                } else if (targetMoveIndex - $(selectedPiece).index() ==
+                    2) {
+                    middleBox = $(middleRow).children()[targetMoveIndex - 1]
+                }
+                if (middleBox.innerHTML != '') {
+                    $(selectedPiece).removeAttr('style');
+                    idMovits = {
+                        "pieceId": selectedPiece.id,
+                        "targetId": targetMove.attr('id'),
+                        "color": colorPiece
+                    }
+                    socketClient.emit('update tablero', idMovits);
+                    if (ableReloj == true) {
+                        ableReloj = false;
+                        var timer = setInterval(function() {
+                            var $tiempo = $('#tiempo');
+                            if ($tiempo.text() == 5) {
+                                restante = $tiempo.text() - 1;
+                                console.log(restante)
+                                $reloj.html("<img src='https://cdn4.iconfinder.com/data/icons/azullustre-mayosoft/AzulLustre_icons/256/Reloj_arena.png' class='rotateDer' width='50' height='50'><span id='tiempo'> " + restante +
+                                    "</span>");
+                            } else if ($tiempo.text() == 4) {
+                                restante = $tiempo.text() - 1;
+                                console.log(restante)
+                                $reloj.html("<img src='https://cdn4.iconfinder.com/data/icons/azullustre-mayosoft/AzulLustre_icons/256/Reloj_arena.png'  width='50' height='50'><span id='tiempo'> " + restante + "</span>");
+                            } else if ($tiempo.text() == 3) {
+                                restante = $tiempo.text() - 1;
+                                console.log(restante)
+                                $reloj.html("<img src='https://cdn4.iconfinder.com/data/icons/azullustre-mayosoft/AzulLustre_icons/256/Reloj_arena.png' class='rotateIzq' width='50' height='50'><span id='tiempo'> " + restante +
+                                    "</span>");
+                            } else if ($tiempo.text() == 2) {
+                                restante = $tiempo.text() - 1;
+                                console.log(restante)
+                                socketClient.emit('cambiar turno')
+                                $reloj.html("<img src='https://cdn4.iconfinder.com/data/icons/azullustre-mayosoft/AzulLustre_icons/256/Reloj_arena.png'  width='50' height='50'><span id='tiempo'> " + restante + "</span>");
+                            } else if ($tiempo.text() == 1) {
+                                restante = $tiempo.text() - 1;
+                                console.log(restante)
+                                $reloj.html("<img src='http://bestanimations.com/Military/Explosions/explosion-animated-gif-1.gif' class='rotateDer' width='50' height='50'><span id='tiempo'> " + restante + "</span>");
+                            } else {
+
+
+
+                            }
+                        }, 1000);
+                    }
+                }
+            } else if ((targetRowIndex - selectedRowIndex == 1 || targetRowIndex - selectedRowIndex == -1) && (difIndex == 1 || difIndex == -1) && targetMove.text() != '♟') {
                 colorPiece = $(selectedPiece).css("color");
                 $(selectedPiece).removeAttr('style');
                 idMovits = {
@@ -414,13 +440,41 @@
                     "targetId": targetMove.attr('id'),
                     "color": colorPiece
                 }
+                console.log(idMovits)
+                socketClient.emit('update tablero', idMovits);
+                if (ableReloj == true) {
+                    ableReloj = false;
+                    var timer = setInterval(function() {
+                        var $tiempo = $('#tiempo');
+                        if ($tiempo.text() == 5) {
+                            restante = $tiempo.text() - 1;
+                            console.log(restante)
+                            $reloj.html("<img src='https://cdn4.iconfinder.com/data/icons/azullustre-mayosoft/AzulLustre_icons/256/Reloj_arena.png' class='rotateDer' width='50' height='50'><span id='tiempo'> " + restante + "</span>");
+                        } else if ($tiempo.text() == 4) {
+                            restante = $tiempo.text() - 1;
+                            console.log(restante)
+                            $reloj.html("<img src='https://cdn4.iconfinder.com/data/icons/azullustre-mayosoft/AzulLustre_icons/256/Reloj_arena.png'  width='50' height='50'><span id='tiempo'> " + restante + "</span>");
+                        } else if ($tiempo.text() == 3) {
+                            restante = $tiempo.text() - 1;
+                            console.log(restante)
+                            $reloj.html("<img src='https://cdn4.iconfinder.com/data/icons/azullustre-mayosoft/AzulLustre_icons/256/Reloj_arena.png' class='rotateIzq' width='50' height='50'><span id='tiempo'> " + restante + "</span>");
+                        } else if ($tiempo.text() == 2) {
+                            restante = $tiempo.text() - 1;
+                            console.log(restante)
+                            socketClient.emit('cambiar turno')
+                            $reloj.html("<img src='https://cdn4.iconfinder.com/data/icons/azullustre-mayosoft/AzulLustre_icons/256/Reloj_arena.png'  width='50' height='50'><span id='tiempo'> " + restante + "</span>");
+                        } else if ($tiempo.text() == 1) {
+                            restante = $tiempo.text() - 1;
+                            console.log(restante)
+                            $reloj.html("<img src='http://bestanimations.com/Military/Explosions/explosion-animated-gif-1.gif' class='rotateDer' width='50' height='50'><span id='tiempo'> " + restante + "</span>");
+                        } else {
 
-                this.socketClient.emit('update tablero', idMovits);
-
-
-
+                        }
+                    }, 1000);
+                }
             }
         }
 
-    }
+
+    })
 </script>

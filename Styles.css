@@ -1,9 +1,28 @@
 
 body{
-  background: Steelblue !important;
+  /*background: Steelblue !important;*/
+      background-repeat:no-repeat;
+      background-repeat:no-repeat;
+background-size:cover;
   color: #eee;
   font-family: sans-serif;
   text-align: center;
+  margin: 0;
+  padding: 0;
+}
+.rotateDer {
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+.rotateIzq {
+    -webkit-transform: rotate(-45deg);
+    -moz-transform: rotate(-45deg);
+    -o-transform: rotate(-45deg);
+    -ms-transform: rotate(-45deg);
+    transform: rotate(-45deg);
 }
 #chatPage{
 display:none;
@@ -38,6 +57,7 @@ float:lpeft;
   overflow:auto;
   background-color:white;
 }
+
 img {border:none !important;}
 div {border:none !important;}
 .centrar
