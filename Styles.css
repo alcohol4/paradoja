@@ -80,25 +80,32 @@ div {border:none !important;}
 #tablero{
   background: url('imgs/madera.png') no-repeat center;
    background-size: 1700px 900px;
-  box-shadow: 0 10px 10px -6px rgba(0,0,0,.6);
   border-radius: 3px;
   border-collapse: collapse;
   height: 400px;
   width: 400px;
   margin: auto;
+  box-shadow: 6px 6px 66px red;
+
 }
 #tablero td{
 font-size: 36px;
 color: #222;
 width: 50px;
 height: 50px;
-box-shadow: 1px 1px 1px rgba(255,255,255,.6);
 
 }
+
 #tablero tr:nth-child(odd) td:nth-child(even){
+  text-shadow: 1px 1px 0px #333,
+  2px 2px 0px #333,
+  4px 4px 4px #000;
   background: rgba(0,0,0,.4);
 }
 #tablero tr:nth-child(even) td:nth-child(odd){
+  text-shadow: 1px 1px 0px #333,
+  2px 2px 0px #333,
+  4px 4px 4px #000;
   background: rgba(0,0,0,.4);
 }
 #tablero tr:nth-child(1) td{
@@ -119,9 +126,15 @@ border-width:1px;
 border-style: solid;
 
 }
-.td_clicked{
+.ficha_seleccionada{
 border-color: #FFFFFF;
 border-width:1px;
 border-style: solid;
 
+}
+table{
+border-top:4px solid #800000; /* Borde de arriba */
+border-left:4px solid #800000; /* Borde de izquierda */
+border-right:4px solid #800000; /* Borde de derecha */
+border-bottom:4px solid #800000; /* Borde de abajo */
 }

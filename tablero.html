@@ -61,7 +61,7 @@
                 <div class="col-md-1">
                 </div>
                 <div id="loginContainer" class="input-group" style="text-align:center; margin:0 auto;">
-                    <input id="nickname" class="form-control input-lg" type="text" placeholder="Introduce tu nickname gato" style="text-align: center">
+                    <input id="nickJugador" class="form-control input-lg" type="text" placeholder="Introduce tu nickname gato" style="text-align: center">
                     <button id="setNick" class="btn btn-lg btn-success" type="submit"> ENTRAR </button>
                 </div>
                 <div id="loginError" class="alert fade in alert-danger alert-dismissable" data-dismiss="alert" style="display:none;">
@@ -185,296 +185,55 @@
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 
 <script>
-    var $reloj = $('#reloj');
-    var restante;
+var $setNick = $('#setNick');
+var $nickJugador;
+var socketClient = io.connect();
+var $celda =  $("#tablero td");
+var $ficha = $("#tablero td");
+var $targetCelda;
+var validateData = {};
+var blockFicha = false;
+jQuery(function($) {
 
+$setNick.click(function(){
+$nickJugador = $('#nickJugador').val();
+socketClient.emit('crear jugador', $nickJugador);
+})
 
-    var selectedPiece;
-    jQuery(function($) {
-        var socketClient = io.connect();
-        socketClient.on('refresh tablero', function(data) {
-            jQuery('#' + data.pieceId).text("")
-            jQuery('#' + data.targetId).text("♟")
-            jQuery('#' + data.pieceId).removeAttr('style');
-            jQuery('#' + data.pieceId).css("color", "#222222")
+$celda.click(function(data){
+if($ficha.hasClass('ficha_seleccionada')==true && $("#"+data.target.id).text() != '♟'){
+  $targetCelda = $("#"+data.target.id);
+  validateData.fichaFila = $ficha.closest("tr").index();
+  validateData.targetFila = $(this).closest("tr").index();
+  validateData.fichaColumn = $ficha.closest("td").index();
+  validateData.targetColumn = $(this).closest("td").index();
+  validateData.targetId = data.target.id;
+  validateData.fichaId = $ficha.attr('id');
+  socketClient.emit('validar movimiento peon', validateData);
+}else if(blockFicha != true){
+$($ficha).removeClass("ficha_seleccionada");
+$ficha = $("#"+data.target.id);
+validateData.nickJugador = $nickJugador;
+validateData.colorPiece =   $ficha.css('color');
+  socketClient.emit('validar seleccion peon', validateData);
+  }
+})
 
-            if (data.color == 'rgb(255, 255, 255)') {
-                jQuery('#' + data.targetId).css('color', '#FFFFFF');
-            } else if (data.color == 'rgb(0, 0, 0)') {
-                jQuery('#' + data.targetId).css('color', '#000000');
-            }
-        });
-        var $messageForm = $('#sendMessage');
-        var $messageBox = $('#message');
-        var $chat = $('#chatBody');
-        var $buttonSend = $('#send');
-        var $nickForm = $('#setNick');
-        var $nickBox = $('#nickname');
-        var $users = $('#usersBody');
-        var $closeAlert = $('#closeAlert');
-        var $setBlancas = $('#setBlancas');
-        var $setNegras = $('#setNegras');
-        var $jugadores = $('#jugadores');
-        var $pasarTurno = $('#pasarTurno');
-        var playerBlancas = false;
-        var playerNegras = false;
-        var turnBlancas;
-        var turnNegras;
-        var validateNegras = false;
-        var validateBlancas = false;
-        var validateNegras = false;
-        var myPlayer;
-        var players = [];
-        var targetMove;
-        var selectedRow;
-        var targetRow;
-        var nextRow;
-        var secondMove = false;
-        var lockPiece;
-        var timeTurno = false;
-        var socketClient = io.connect();
-        var ableReloj = true;
-        $pasarTurno.click(function(e) {
-            e.preventDefault()
-
-            socketClient.emit('cambiar turno')
-
-        })
-
-        socketClient.on('carga variables', function(data) {
-
-            turnBlancas = data.turnBlancas;
-            turnNegras = data.turnNegras;
-            console.log(turnBlancas)
-            console.log(turnNegras)
-        })
-        socketClient.on('setear turno', function(data) {
-            turnBlancas = data.turnBlancas;
-            turnNegras = data.turnNegras;
-            console.log(turnBlancas)
-            console.log(turnNegras)
-        })
-        socketClient.on('empieza el juego', function(data) {
-            $('#startImg').fadeIn('slow').delay(1000).hide(1000);
-        });
-        $nickForm.click(function(e) {
-            e.preventDefault()
-            socketClient.emit('new user', $nickBox.val(), function(data) {
-                console.log('$nickBox.val()')
-
-                if (data) {
-                    $('#loginContainer').hide()
-                    $('#chatPage').show()
-                    $jugadores.show()
-                    myPlayer = $nickBox.val();
-                    socketClient.emit('send message', ($nickBox.val() + ' hola, he entrado al chat!'))
-                } else {
-                    $("loginError").show()
-                }
-            })
-        })
-
-        $closeAlert.click(function(e) {
-            $("#loginError").hide()
-        })
-
-        $setBlancas.click(function(e) {
-            socketClient.emit('set player blancas');
-        })
-        $setNegras.click(function(e) {
-            socketClient.emit('set player negras');
-        })
-        $messageForm.submit(function(e) {
-            e.preventDefault();
-            if ($messageBox.val() != '') socketClient.emit('send message', $messageBox.val());
-            $messageBox.val('');
-        })
-        socketClient.on('player blancas', function(data) {
-            if (data.nick) {
-                playerBlancas = data.nick;
-                $($setBlancas).replaceWith(
-                    "<h2 id='playerBlancas'><img src='http://vignette1.wikia.nocookie.net/mundogaturro/images/8/8b/SILLA_ROSA.png/revision/latest/scale-to-width-down/329?cb=20170304223153&path-prefix=es' height='42' width='42'> " +
-                    data.nick + "</h2>");
-            }
-        })
-        socketClient.on('player negras', function(data) {
-            if (data.nick) {
-                playerNegras = data.nick;
-                $($setNegras).replaceWith(
-                    "<h2 id='playerNegras'><img src='http://vignette1.wikia.nocookie.net/mundogaturro/images/8/8b/SILLA_ROSA.png/revision/latest/scale-to-width-down/329?cb=20170304223153&path-prefix=es' height='42' width='42'> " +
-                    data.nick + "</h2>");
-            }
-        })
-        socketClient.on('new message', function(data) {
-            $chat.append('<b>' + data.nick + ":</b> " + data.msg + "<br/>");
-        })
-        socketClient.on('usernames', function(data) {
-            var html = '';
-            for (var username in data) {
-                html += username + '<br/>';
-            }
-            $users.html(html);
-        })
-        socketClient.on('check player blancas', function(data) {
-            validateBlancas = data;
-        });
-        socketClient.on('check player negras', function(data) {
-            validateNegras = data;
-        });
-        socketClient.emit('validate player blancas', playerBlancas);
-        socketClient.emit('validate player negras', playerNegras);
-        $("#tablero td").click(function() {
-            console.log(myPlayer);
-            console.log('-- -');
-            console.log("negras" + playerNegras);
-            console.log("blancas" + playerBlancas);
-            console.log(myPlayer);
-            console.log(turnBlancas);
-            console.log(turnNegras);
-            console.log($(this).css('color'));
-            if ((myPlayer == playerBlancas && turnBlancas == true && ($(this).css('color') == 'rgb(255, 255, 255)' || $(this).css('color') == 'rgb(34, 34, 34)')) || (myPlayer == playerNegras &&
-                    turnNegras == true && ($(this).css('color') == 'rgb(0, 0, 0)' || $(this).css('color') == 'rgb(34, 34, 34)'))) {
-                console.log(myPlayer)
-                console.log(turnBlancas)
-                console.log($(this).css('color'))
-                if (selectedPiece && selectedPiece.className) {
-                    targetMove = $(this);
-                    targetRow = $(this).parent();
-                    colorPiece = $(selectedPiece).css("color");
-                    console.log(selectedPiece)
-                    console.log(selectedPiece.className)
-                    checkAbailability(selectedRow, targetRow)
-                }
-                $(selectedPiece).removeClass("td_clicked")
-                selectedPiece = $(this)[0];
-                $("#tablero tr").each(function(indexTr) {
-                    $(this).children("td").each(function(indexTd) {
-                        if ($(this)[0].className) {} else if (!$(selectedPiece).className && $(selectedPiece).text() != '') {
-                            selectedRow = $(selectedPiece).parent();
-                            $(selectedPiece).addClass("td_clicked");
-                        };
-                    })
-                })
-            }
-        });
-        socketClient.on('setear turno', function(data) {
-
-
-        })
-
-
-        function timeTurno() {
-
-        }
-
-        function checkAbailability(selectedRow, targetRow) {
-            var selectedRowIndex = selectedRow.index()
-            var targetRowIndex = targetRow.index()
-            var targetMoveIndex = targetMove.index()
-            if ($(targetMove)[0].className == 'blanca') {
-                return false;
-            }
-            var difIndex = targetMoveIndex - $(selectedPiece).index();
-            if ((targetRowIndex - selectedRowIndex == 2 || targetRowIndex -
-                    selectedRowIndex == -2) && targetMove.text() != '♟') {
-                var middleBox;
-                if (targetRowIndex - selectedRowIndex == 2) {
-                    middleRow = selectedRow.parent().children()[selectedRowIndex + 1];
-                } else if (targetRowIndex - selectedRowIndex == -2) {
-                    middleRow = selectedRow.parent().children()[selectedRowIndex - 1];
-                }
-                if (targetMoveIndex - $(selectedPiece).index() == -2) {
-                    middleBox = $(middleRow).children()[targetMoveIndex + 1]
-                } else if (targetMoveIndex - $(selectedPiece).index() ==
-                    2) {
-                    middleBox = $(middleRow).children()[targetMoveIndex - 1]
-                }
-                if (middleBox.innerHTML != '') {
-                    $(selectedPiece).removeAttr('style');
-                    idMovits = {
-                        "pieceId": selectedPiece.id,
-                        "targetId": targetMove.attr('id'),
-                        "color": colorPiece
-                    }
-                    socketClient.emit('update tablero', idMovits);
-                    if (ableReloj == true) {
-                        ableReloj = false;
-                        var timer = setInterval(function() {
-                            var $tiempo = $('#tiempo');
-                            if ($tiempo.text() == 5) {
-                                restante = $tiempo.text() - 1;
-                                console.log(restante)
-                                $reloj.html("<img src='https://cdn4.iconfinder.com/data/icons/azullustre-mayosoft/AzulLustre_icons/256/Reloj_arena.png' class='rotateDer' width='50' height='50'><span id='tiempo'> " + restante +
-                                    "</span>");
-                            } else if ($tiempo.text() == 4) {
-                                restante = $tiempo.text() - 1;
-                                console.log(restante)
-                                $reloj.html("<img src='https://cdn4.iconfinder.com/data/icons/azullustre-mayosoft/AzulLustre_icons/256/Reloj_arena.png'  width='50' height='50'><span id='tiempo'> " + restante + "</span>");
-                            } else if ($tiempo.text() == 3) {
-                                restante = $tiempo.text() - 1;
-                                console.log(restante)
-                                $reloj.html("<img src='https://cdn4.iconfinder.com/data/icons/azullustre-mayosoft/AzulLustre_icons/256/Reloj_arena.png' class='rotateIzq' width='50' height='50'><span id='tiempo'> " + restante +
-                                    "</span>");
-                            } else if ($tiempo.text() == 2) {
-                                restante = $tiempo.text() - 1;
-                                console.log(restante)
-                                socketClient.emit('cambiar turno')
-                                $reloj.html("<img src='https://cdn4.iconfinder.com/data/icons/azullustre-mayosoft/AzulLustre_icons/256/Reloj_arena.png'  width='50' height='50'><span id='tiempo'> " + restante + "</span>");
-                            } else if ($tiempo.text() == 1) {
-                                restante = $tiempo.text() - 1;
-                                console.log(restante)
-                                $reloj.html("<img src='http://bestanimations.com/Military/Explosions/explosion-animated-gif-1.gif' class='rotateDer' width='50' height='50'><span id='tiempo'> " + restante + "</span>");
-                            } else {
-
-
-
-                            }
-                        }, 1000);
-                    }
-                }
-            } else if ((targetRowIndex - selectedRowIndex == 1 || targetRowIndex - selectedRowIndex == -1) && (difIndex == 1 || difIndex == -1) && targetMove.text() != '♟') {
-                colorPiece = $(selectedPiece).css("color");
-                $(selectedPiece).removeAttr('style');
-                idMovits = {
-                    "pieceId": selectedPiece.id,
-                    "targetId": targetMove.attr('id'),
-                    "color": colorPiece
-                }
-                console.log(idMovits)
-                socketClient.emit('update tablero', idMovits);
-                if (ableReloj == true) {
-                    ableReloj = false;
-                    var timer = setInterval(function() {
-                        var $tiempo = $('#tiempo');
-                        if ($tiempo.text() == 5) {
-                            restante = $tiempo.text() - 1;
-                            console.log(restante)
-                            $reloj.html("<img src='https://cdn4.iconfinder.com/data/icons/azullustre-mayosoft/AzulLustre_icons/256/Reloj_arena.png' class='rotateDer' width='50' height='50'><span id='tiempo'> " + restante + "</span>");
-                        } else if ($tiempo.text() == 4) {
-                            restante = $tiempo.text() - 1;
-                            console.log(restante)
-                            $reloj.html("<img src='https://cdn4.iconfinder.com/data/icons/azullustre-mayosoft/AzulLustre_icons/256/Reloj_arena.png'  width='50' height='50'><span id='tiempo'> " + restante + "</span>");
-                        } else if ($tiempo.text() == 3) {
-                            restante = $tiempo.text() - 1;
-                            console.log(restante)
-                            $reloj.html("<img src='https://cdn4.iconfinder.com/data/icons/azullustre-mayosoft/AzulLustre_icons/256/Reloj_arena.png' class='rotateIzq' width='50' height='50'><span id='tiempo'> " + restante + "</span>");
-                        } else if ($tiempo.text() == 2) {
-                            restante = $tiempo.text() - 1;
-                            console.log(restante)
-                            socketClient.emit('cambiar turno')
-                            $reloj.html("<img src='https://cdn4.iconfinder.com/data/icons/azullustre-mayosoft/AzulLustre_icons/256/Reloj_arena.png'  width='50' height='50'><span id='tiempo'> " + restante + "</span>");
-                        } else if ($tiempo.text() == 1) {
-                            restante = $tiempo.text() - 1;
-                            console.log(restante)
-                            $reloj.html("<img src='http://bestanimations.com/Military/Explosions/explosion-animated-gif-1.gif' class='rotateDer' width='50' height='50'><span id='tiempo'> " + restante + "</span>");
-                        } else {
-
-                        }
-                    }, 1000);
-                }
-            }
-        }
-
-
-    })
+socketClient.on('comunicar seleccion', function(data){
+  if(data == true){
+    $ficha.addClass('ficha_seleccionada');
+  }
+});
+socketClient.on('comunicar movimiento', function(data){
+  if(data == true){
+    $targetCelda.css('color', $ficha.css('color'))
+    $targetCelda.text($ficha.text());
+    $ficha.text('')
+    $ficha.removeClass('ficha_seleccionada');
+    $targetCelda.addClass('ficha_seleccionada');
+    $ficha = $targetCelda;
+    blockFicha = true;
+  }
+});
+})
 </script>
