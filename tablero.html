@@ -16,7 +16,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 
-<body background="https://media.tenor.co/images/d75e2c72a68d41c3d2955e7f912d3b19/tenor.gif">
+<body background="https://imagenes.es.sftcdn.net/es/scrn/95000/95390/aquazone-2-oceans-of-the-world-4.png">
     <div class="row">
         <div class="col-md-4"></div>
         <div class="col-md-4">
@@ -162,14 +162,15 @@
             </table>
             <br/>
             <button id="pasarTurno" class="btn btn-lg btn-success" type="submit"> pasar turno </button>
-
         </div>
-
-
         <div class="col-md-4">
-            <div id="jugadores" style="display: none;">
-                <button id="setBlancas" class="btn btn-lg btn-success" type="submit"> sentarse </button>
-                <button id="setNegras" class="btn btn-lg btn-success" type="submit"> sentarse </button>
+            <div id="jugadores" width="200px">
+
+              <table id="listaJugadores" width="200px">
+                <FONT FACE="Impact">
+                <MARQUEE width="200px" >Esto se ve con la fuente Impact</MARQUEE>
+                </FONT>
+              </table>
             </div>
         </div>
         <div id="startImg" class='centrar' hidden>
@@ -177,15 +178,84 @@
             <img src='http://vignette2.wikia.nocookie.net/alternativesaga/images/d/d7/Dueling_lightsabers.png/revision/latest?cb=20121230013338' class='centrar'>
         </div>
         <p id="selected" hidden></p>
-
 </body>
 <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+<canvas id="myCanvas" width="1700" height="1000" style="border:1px solid black;">
 
 </html>
+<script src="animation.js"></script>
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
-
 <script>
+var anim = new Animation("myCanvas");
+var canvas = anim.getCanvas();
+var context = anim.getContext();
+var time;
+
+anim.setStage(function()
+{
+// actualiziamos
+var widthScale = Math.sin(this.getTime() / 200) *0.1 + 0.3;
+var heightScale = -1 * Math.sin(this.getTime() /200) * 0.1 + 0.3;
+
+// borramos actual
+this.clear();
+console.log(  anim)
+if(anim.getTime()>=10500){
+  anim.t = anim.t - 10000;
+}
+//dibujamos nuevamente
+var altura= 1000;
+context.beginPath();
+context.save();
+context.translate(canvas.width / 3, altura-1*this.getTime() /10);
+context.scale(widthScale, heightScale);
+context.arc(0, 0, 65, 0, 2 * Math.PI, false);
+context.restore();
+context.fillStyle ="rgba(0, 0, 0, 0.2)";
+//context.fillStyle = "#EBf4FA";// estilo blanco burubuja
+context.fill();
+context.lineWidth = 2;
+context.strokeStyle = "#555";
+context.stroke();
+context.beginPath();
+context.save();
+context.translate(canvas.width / 2, altura-100-1*this.getTime() /10);
+context.scale(widthScale, heightScale);
+context.arc(0, 0, 65, 0, 2 * Math.PI, false);
+context.restore();
+context.fillStyle ="rgba(0, 0, 0, 0.2)";
+//context.fillStyle = "#EBf4FA";// estilo blanco burubuja
+context.fill();
+context.lineWidth = 2;
+context.strokeStyle = "#555";
+context.stroke();
+context.beginPath();
+context.save();
+context.translate(canvas.width / 3, altura-1*this.getTime() /10);
+context.scale(widthScale, heightScale);
+context.arc(-30, -30, 15, 0, 2 * Math.PI, false);
+context.restore();
+context.fillStyle = "white";
+context.fill();
+
+
+});
+function arrancar(){
+  addEventListener('load', function() {
+          anim.start();
+      }, false);
+}arrancar();
+
+console.log(anim)
+
+
+
+
+
+
+
 var $setNick = $('#setNick');
+var $pasarTurno = $('#pasarTurno');
 var $nickJugador;
 var socketClient = io.connect();
 var $celda =  $("#tablero td");
@@ -194,25 +264,55 @@ var $targetCelda;
 var validateData = {};
 var blockFicha = false;
 jQuery(function($) {
-
 $setNick.click(function(){
 $nickJugador = $('#nickJugador').val();
 socketClient.emit('crear jugador', $nickJugador);
 })
+$pasarTurno.click(function(){
+socketClient.emit('pasar turno');
+$ficha.removeClass('ficha_seleccionada');
+})
 
 $celda.click(function(data){
+  console.log(data)
+  console.log(data)
+
 if($ficha.hasClass('ficha_seleccionada')==true && $("#"+data.target.id).text() != '♟'){
   $targetCelda = $("#"+data.target.id);
   validateData.fichaFila = $ficha.closest("tr").index();
   validateData.targetFila = $(this).closest("tr").index();
   validateData.fichaColumn = $ficha.closest("td").index();
   validateData.targetColumn = $(this).closest("td").index();
+  validateData.saltoDoble = {
+  izqArriba : $($ficha.closest("tr").prev().children()[validateData.fichaColumn-1]).text(),
+  izqAbajo : $($ficha.closest("tr").next().children()[validateData.fichaColumn-1]).text(),
+  derArriba : $($ficha.closest("tr").prev().children()[validateData.fichaColumn+1]).text(),
+  derAbajo : $($ficha.closest("tr").next().children()[validateData.fichaColumn+1]).text()
+    };
   validateData.targetId = data.target.id;
   validateData.fichaId = $ficha.attr('id');
+  var columDif = validateData.targetColumn - validateData.fichaColumn;
+  filaDif = validateData.targetFila - validateData.fichaFila;
+
+  if(filaDif == -2){
+if(columDif == -2){
+  validateData.direccion = 'izqArriba';
+}else if(columDif == 2){
+  validateData.direccion = 'derArriba';
+  }
+}
+  else if(filaDif == 2){
+    if(columDif == -2){
+      validateData.direccion = 'izqAbajo';
+    }else if(columDif == 2){
+      validateData.direccion = 'derAbajo';
+      }
+  }
   socketClient.emit('validar movimiento peon', validateData);
-}else if(blockFicha != true){
-$($ficha).removeClass("ficha_seleccionada");
+}
+else if(blockFicha != true){
 $ficha = $("#"+data.target.id);
+console.log($ficha)
 validateData.nickJugador = $nickJugador;
 validateData.colorPiece =   $ficha.css('color');
   socketClient.emit('validar seleccion peon', validateData);
@@ -220,19 +320,30 @@ validateData.colorPiece =   $ficha.css('color');
 })
 
 socketClient.on('comunicar seleccion', function(data){
-  if(data == true){
+  if($nickJugador == data.turnoJugador){
     $ficha.addClass('ficha_seleccionada');
   }
 });
+socketClient.on('desbloquear pieza', function(data){
+  console.log("asdasdds");
+
+  blockFicha = false;
+});
 socketClient.on('comunicar movimiento', function(data){
-  if(data == true){
-    $targetCelda.css('color', $ficha.css('color'))
-    $targetCelda.text($ficha.text());
-    $ficha.text('')
-    $ficha.removeClass('ficha_seleccionada');
-    $targetCelda.addClass('ficha_seleccionada');
-    $ficha = $targetCelda;
+  if(data.validate == true){
+    var trMove = $("#tablero tr").find('td:eq('+data.targetColumn+')');
+    var targetMove = trMove[data.targetFila];
+    var trFicha = $("#tablero tr").find('td:eq('+data.fichaColumn+')');
+    var ficha = trFicha[data.fichaFila];
+    $(targetMove).css('color', $(ficha).css('color'))
+    $(targetMove).text('♟');
+    $(ficha).text('')
+    if($nickJugador == data.turnoJugador){
+      $(ficha).removeClass('ficha_seleccionada');
+      $(targetMove).addClass('ficha_seleccionada');
+    }
     blockFicha = true;
+    $ficha = $(targetMove);
   }
 });
 })
