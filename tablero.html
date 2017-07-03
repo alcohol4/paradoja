@@ -73,7 +73,7 @@
             <br/>
             <br/>
             <div>
-                <h1 id="reloj"><img src="https://cdn4.iconfinder.com/data/icons/azullustre-mayosoft/AzulLustre_icons/256/Reloj_arena.png" width='50' height='50' alt="">
+                <h1 id="pasarTurno"><img src="https://cdn4.iconfinder.com/data/icons/azullustre-mayosoft/AzulLustre_icons/256/Reloj_arena.png" width='50' height='50' alt="">
   <span id='tiempo'>5</span></h1>
             </div>
             <br/>
@@ -161,7 +161,6 @@
                 </tr>
             </table>
             <br/>
-            <button id="pasarTurno" class="btn btn-lg btn-success" type="submit"> pasar turno </button>
         </div>
         <div class="col-md-4">
             <div id="jugadores" width="200px">
@@ -199,7 +198,6 @@ var heightScale = -1 * Math.sin(this.getTime() /200) * 0.1 + 0.3;
 
 // borramos actual
 this.clear();
-console.log(  anim)
 if(anim.getTime()>=10500){
   anim.t = anim.t - 10000;
 }
@@ -237,20 +235,12 @@ context.arc(-30, -30, 15, 0, 2 * Math.PI, false);
 context.restore();
 context.fillStyle = "white";
 context.fill();
-
-
 });
 function arrancar(){
   addEventListener('load', function() {
           anim.start();
       }, false);
 }arrancar();
-
-console.log(anim)
-
-
-
-
 
 
 
@@ -274,8 +264,6 @@ $ficha.removeClass('ficha_seleccionada');
 })
 
 $celda.click(function(data){
-  console.log(data)
-  console.log(data)
 
 if($ficha.hasClass('ficha_seleccionada')==true && $("#"+data.target.id).text() != '♟'){
   $targetCelda = $("#"+data.target.id);
@@ -312,7 +300,6 @@ if(columDif == -2){
 }
 else if(blockFicha != true){
 $ficha = $("#"+data.target.id);
-console.log($ficha)
 validateData.nickJugador = $nickJugador;
 validateData.colorPiece =   $ficha.css('color');
   socketClient.emit('validar seleccion peon', validateData);
@@ -320,24 +307,26 @@ validateData.colorPiece =   $ficha.css('color');
 })
 
 socketClient.on('comunicar seleccion', function(data){
-  if($nickJugador == data.turnoJugador){
+  console.log(data)
+  if(data.validate == true){
     $ficha.addClass('ficha_seleccionada');
   }
 });
 socketClient.on('desbloquear pieza', function(data){
-  console.log("asdasdds");
-
   blockFicha = false;
 });
 socketClient.on('comunicar movimiento', function(data){
   if(data.validate == true){
+    console.log(data);
     var trMove = $("#tablero tr").find('td:eq('+data.targetColumn+')');
     var targetMove = trMove[data.targetFila];
     var trFicha = $("#tablero tr").find('td:eq('+data.fichaColumn+')');
     var ficha = trFicha[data.fichaFila];
     $(targetMove).css('color', $(ficha).css('color'))
     $(targetMove).text('♟');
-    $(ficha).text('')
+    $(ficha).text('');
+    $('#'+data.fichaId).removeClass('ficha_seleccionada');
+    $('#'+data.targetId).addClass('ficha_seleccionada');
     if($nickJugador == data.turnoJugador){
       $(ficha).removeClass('ficha_seleccionada');
       $(targetMove).addClass('ficha_seleccionada');

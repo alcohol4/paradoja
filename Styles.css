@@ -91,16 +91,22 @@ div {border:none !important;}
   width: 400px;
   margin: auto;
   box-shadow: 6px 6px 66px red;
-
+  position:absolute; z-index:5;
 }
 #tablero td{
 font-size: 36px;
 color: #222;
 width: 50px;
 height: 50px;
+}
+#pasarTurno{
+  position:relative; z-index:5;
 
 }
+#setNick{
+  position:relative; z-index:5;
 
+}
 #tablero tr:nth-child(odd) td:nth-child(even){
   text-shadow: 1px 1px 0px #333,
   2px 2px 0px #333,

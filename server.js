@@ -45,18 +45,18 @@ io.sockets.on('connection', function(socket) {
     }
   })
   socket.on('validar seleccion peon', function(data) {
-    console.log(socket.nickJugador)
-    console.log(turnoJugador)
-    console.log(jugador.negras)
-    console.log( blockPiece.status)
-console.log(data)
-if(socket.nickJugador == turnoJugador && socket.nickJugador == jugador.blancas && data.colorPiece == 'rgb(255, 255, 255)' && blockPiece.status == false){
+data.validate = false;
+console.log(socket.nickJugador)
+if(socket.nickJugador != 'undefined' && socket.nickJugador == turnoJugador && socket.nickJugador == jugador.blancas && data.colorPiece == 'rgb(255, 255, 255)' && blockPiece.status == false){
   data.turnoJugador = turnoJugador;
+  data.validate = true;
   io.sockets.emit('comunicar seleccion', data);
-}else if(socket.nickJugador == turnoJugador && socket.nickJugador == jugador.negras && data.colorPiece == 'rgb(0, 0, 0)' && blockPiece.status == false)
+}else if(socket.nickJugador != 'undefined' && socket.nickJugador == turnoJugador && socket.nickJugador == jugador.negras && data.colorPiece == 'rgb(0, 0, 0)' && blockPiece.status == false){
 data.turnoJugador = turnoJugador;
+data.validate = true;
 io.sockets.emit('comunicar seleccion', data);
-  })
+  }
+})
   socket.on('validar movimiento peon', function(data) {
     filaDif = data.targetFila - data.fichaFila;
     columDif = data.targetColumn - data.fichaColumn;
