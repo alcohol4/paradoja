@@ -77,90 +77,6 @@
   <span id='tiempo'>5</span></h1>
             </div>
             <br/>
-            <br/>
-            <table id="tablero">
-                <tr id="8">
-                    <td class='blanca'></td>
-                    <td id="b8">&#9823;</td>
-                    <td class='blanca'></td>
-                    <td id="d8">&#9823;</td>
-                    <td class='blanca'></td>
-                    <td id="f8">&#9823;</td>
-                    <td class='blanca'></td>
-                    <td id="h8">&#9823;</td>
-                </tr>
-                <tr id="7">
-                    <td id="a7">&#9823;</td>
-                    <td class='blanca'></td>
-                    <td id="c7">&#9823;</td>
-                    <td class='blanca'></td>
-                    <td id="e7">&#9823;</td>
-                    <td class='blanca'></td>
-                    <td id="g7">&#9823;</td>
-                    <td class='blanca'></td>
-                </tr>
-                <tr id="6">
-                    <td class='blanca'></td>
-                    <td id="b6"></td>
-                    <td class='blanca'></td>
-                    <td id="d6"></td>
-                    <td class='blanca'></td>
-                    <td id="f6"></td>
-                    <td class='blanca'></td>
-                    <td id="g6"></td>
-                </tr>
-                <tr id="5">
-                    <td id="a5"></td>
-                    <td class='blanca'></td>
-                    <td id="c5"></td>
-                    <td class='blanca'></td>
-                    <td id="e5"></td>
-                    <td class='blanca'></td>
-                    <td id="g5"></td>
-                    <td class='blanca'></td>
-                </tr>
-                <tr id="4">
-                    <td class='blanca'></td>
-                    <td id="b4"></td>
-                    <td class='blanca'></td>
-                    <td id="d4"></td>
-                    <td class='blanca'></td>
-                    <td id="g4"></td>
-                    <td class='blanca'></td>
-                    <td id="i4"></td>
-                </tr>
-                <tr id="3">
-                    <td id="a3"></td>
-                    <td class='blanca'></td>
-                    <td id="c3"></td>
-                    <td class='blanca'></td>
-                    <td id="e3"></td>
-                    <td class='blanca'></td>
-                    <td id="g3"></td>
-                    <td class='blanca'></td>
-                </tr>
-                <tr id="2">
-                    <td class='blanca'></td>
-                    <td id="b2">&#9823;</td>
-                    <td class='blanca'></td>
-                    <td id="d2">&#9823;</td>
-                    <td class='blanca'></td>
-                    <td id="g2">&#9823;</td>
-                    <td class='blanca'></td>
-                    <td id="i2">&#9823;</td>
-                </tr>
-                <tr id="1">
-                    <td id="a1">&#9823;</td>
-                    <td class='blanca'></td>
-                    <td id="c1">&#9823;</td>
-                    <td class='blanca'></td>
-                    <td id="e1">&#9823;</td>
-                    <td class='blanca'></td>
-                    <td id="g1">&#9823;</td>
-                    <td class='blanca'></td>
-                </tr>
-            </table>
-            <br/>
         </div>
         <div class="col-md-4">
             <div id="jugadores" width="200px">
@@ -185,11 +101,56 @@
 <script src="animation.js"></script>
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <script>
+
 var anim = new Animation("myCanvas");
 var canvas = anim.getCanvas();
 var context = anim.getContext();
 var time;
+var mouseX;
+var mouseY;
+if (canvas && canvas.getContext) {
+		  var ctx = canvas.getContext("2d");
+		  if (ctx) {
+		    var output = document.getElementById("output");
 
+		    canvas.addEventListener("mousemove", function(evt) {
+		      var mousePos = oMousePos(canvas, evt);
+		      marcarCoords(output, mousePos.x, mousePos.y)
+		    }, false);
+
+		    canvas.addEventListener("mouseout", function(evt) {
+		      limpiarCoords(output);
+		    }, false);
+		  }
+		}
+
+		function marcarCoords(output, x, y) {
+		  output.innerHTML = ("x: " + x + ", y: " + y);
+		  output.style.top = (y + 10) + "px";
+		  output.style.left = (x + 10) + "px";
+		  output.style.backgroundColor = "#FFF";
+		  output.style.border = "1px solid #d9d9d9"
+		  canvas.style.cursor = "pointer";
+		}
+
+		function limpiarCoords(output) {
+		  output.innerHTML = "";
+		  output.style.top = 0 + "px";
+		  output.style.left = 0 + "px";
+		  output.style.backgroundColor = "transparent"
+		  output.style.border = "none";
+		  canvas.style.cursor = "default";
+		}
+
+		function oMousePos(canvas, evt) {
+		  var ClientRect = canvas.getBoundingClientRect();
+      mouseX = Math.round(evt.clientX - ClientRect.left);
+      mouseY = Math.round(evt.clientY - ClientRect.top);
+		  return { //objeto
+		    x: Math.round(evt.clientX - ClientRect.left),
+		    y: Math.round(evt.clientY - ClientRect.top)
+		  }
+		}
 anim.setStage(function()
 {
 // actualiziamos
@@ -210,6 +171,9 @@ context.scale(widthScale, heightScale);
 context.arc(0, 0, 65, 0, 2 * Math.PI, false);
 context.restore();
 context.fillStyle ="rgba(0, 0, 0, 0.2)";
+var img = new Image();
+img.src = 'imgs/pez.gif';
+context.drawImage(img, mouseX/2, mouseY/2);
 //context.fillStyle = "#EBf4FA";// estilo blanco burubuja
 context.fill();
 context.lineWidth = 2;
@@ -307,7 +271,6 @@ validateData.colorPiece =   $ficha.css('color');
 })
 
 socketClient.on('comunicar seleccion', function(data){
-  console.log(data)
   if(data.validate == true){
     $ficha.addClass('ficha_seleccionada');
   }
@@ -317,7 +280,6 @@ socketClient.on('desbloquear pieza', function(data){
 });
 socketClient.on('comunicar movimiento', function(data){
   if(data.validate == true){
-    console.log(data);
     var trMove = $("#tablero tr").find('td:eq('+data.targetColumn+')');
     var targetMove = trMove[data.targetFila];
     var trFicha = $("#tablero tr").find('td:eq('+data.fichaColumn+')');
