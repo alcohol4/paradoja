@@ -22,7 +22,25 @@ var turno = {blancas : true,
 var blockPiece = { status: false,
   id:''
 };
+i=0;
+var listaJugadores = {};
 io.sockets.on('connection', function(socket) {
+listaJugadores[i]={id:socket.id}
+i++;
+  socket.on('pintar', function(data) {
+Object.keys(listaJugadores).forEach(function(key) {
+  if (listaJugadores[key].id == data.id) {
+    listaJugadores[key]= {
+      id:data.id,
+      x:data.coordenadas.x,
+    y:data.coordenadas.y};
+    io.sockets.emit('pintando', listaJugadores);
+  }
+});
+  });
+  socket.on('mandarMensaje', function(data) {
+    io.sockets.emit('comunicar', data);
+  });
   socket.on('crear jugador', function(data) {
       socket.nickJugador=data;
       if(jugador.blancas == ''){
@@ -46,7 +64,6 @@ io.sockets.on('connection', function(socket) {
   })
   socket.on('validar seleccion peon', function(data) {
 data.validate = false;
-console.log(socket.nickJugador)
 if(socket.nickJugador != 'undefined' && socket.nickJugador == turnoJugador && socket.nickJugador == jugador.blancas && data.colorPiece == 'rgb(255, 255, 255)' && blockPiece.status == false){
   data.turnoJugador = turnoJugador;
   data.validate = true;

@@ -18,7 +18,11 @@
 
 <body background="https://imagenes.es.sftcdn.net/es/scrn/95000/95390/aquazone-2-oceans-of-the-world-4.png">
     <div class="row">
-        <div class="col-md-4"></div>
+      <br/>
+
+        <div class="col-md-4">
+             <input id="messageChatBox" class="form-control input-lg" type="text" onkeypress="return runScript(event)" placeholder="Escribe tu msg y presiona enter Maru :P" style="text-align: center">
+        </div>
         <div class="col-md-4">
             <h1></h1></div>
         <div class="col-md-4"></div>
@@ -52,7 +56,7 @@
                     <div class="col-md-11">
                         <form id="sendMessage" class="input-group" style="text-align:center; margin: 0 auto;">
                             <input id="message" class="form-control input-lg" type="text" style="background-color: #00FFCC">
-                            <button class="btn btn-lg btn-primary" type="submit"> ENVIAR </button>
+                            <button class="btn btn-lg btn-primary" type="submit"> Manda tu msg </button>
                         </form>
                     </div>
                 </div>
@@ -60,10 +64,7 @@
             <div class="row" style="text-align:center;">
                 <div class="col-md-1">
                 </div>
-                <div id="loginContainer" class="input-group" style="text-align:center; margin:0 auto;">
-                    <input id="nickJugador" class="form-control input-lg" type="text" placeholder="Introduce tu nickname gato" style="text-align: center">
-                    <button id="setNick" class="btn btn-lg btn-success" type="submit"> ENTRAR </button>
-                </div>
+
                 <div id="loginError" class="alert fade in alert-danger alert-dismissable" data-dismiss="alert" style="display:none;">
                     <button id="closeAlert" type="buton" class="close">x</button> No puedes entrar al chat con ese NICK. Ingresa otro
                 </div>
@@ -93,10 +94,13 @@
             <img src='http://vignette2.wikia.nocookie.net/alternativesaga/images/d/d7/Dueling_lightsabers.png/revision/latest?cb=20121230013338' class='centrar'>
         </div>
         <p id="selected" hidden></p>
+<div id='explosion' style='position: fixed; bottom: 111px; right: 111px;'> </div>
+<div id="viñeta" class="imagenFondo" style='width:22%' hidden><div><span id="mensaje">""</span></div></div>
 </body>
 <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
 <canvas id="myCanvas" width="1700" height="1000" style="border:1px solid black;">
 
+</div>
 </html>
 <script src="animation.js"></script>
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
@@ -108,23 +112,52 @@ var context = anim.getContext();
 var time;
 var mouseX;
 var mouseY;
+var coordenadas;
+var userX;
+var userY;
+var socketClient = io.connect();
+var datox;
+
+function runScript(e) {
+    if (e.keyCode == 13) {
+      coordenadas={x:mouseX/2,
+        y: mouseY/2
+      }
+      socketClient.emit('mandarMensaje', { id: socketClient.id, coordenadas: coordenadas, msg: document.getElementById('messageChatBox').value});
+      socketClient.on('comunicar', function(data){
+        cambiarTexto();
+        document.getElementById("messageChatBox").value;
+        var imgViñeta = new Image();
+        imgViñeta.src = 'imgs/viñeta.png';
+        //document.getElementById("viñeta").innerHTML = "xasdasdasd";
+        var d = document.getElementById('viñeta');
+        d.style.position = "relative";
+        d.style.left = data.coordenadas.x - 20 +'px';
+        d.style.top = data.coordenadas.y - 150+'px';
+        $("#viñeta").show();
+        $("#mensaje").html("<span id='mensaje'>"+data.msg+"</span>");
+        $("#viñeta").fadeOut(4000);
+      })
+    }
+}
+function cambiarTexto(){
+}
 if (canvas && canvas.getContext) {
 		  var ctx = canvas.getContext("2d");
 		  if (ctx) {
 		    var output = document.getElementById("output");
-
 		    canvas.addEventListener("mousemove", function(evt) {
 		      var mousePos = oMousePos(canvas, evt);
-		      marcarCoords(output, mousePos.x, mousePos.y)
+		     //marcarCoords(output, mousePos.x, mousePos.y)
 		    }, false);
 
 		    canvas.addEventListener("mouseout", function(evt) {
-		      limpiarCoords(output);
+		      //limpiarCoords(output);
 		    }, false);
 		  }
 		}
 
-		function marcarCoords(output, x, y) {
+		/*(function marcarCoords(output, x, y) {
 		  output.innerHTML = ("x: " + x + ", y: " + y);
 		  output.style.top = (y + 10) + "px";
 		  output.style.left = (x + 10) + "px";
@@ -141,7 +174,7 @@ if (canvas && canvas.getContext) {
 		  output.style.border = "none";
 		  canvas.style.cursor = "default";
 		}
-
+*/
 		function oMousePos(canvas, evt) {
 		  var ClientRect = canvas.getBoundingClientRect();
       mouseX = Math.round(evt.clientX - ClientRect.left);
@@ -163,34 +196,49 @@ if(anim.getTime()>=10500){
   anim.t = anim.t - 10000;
 }
 //dibujamos nuevamente
+pezX = mouseX/2;
+burbujaX = Math.round(canvas.width / 3);
+burbujaY = altura-1*this.getTime()/10;
+var diferencia = burbujaX - pezX;
 var altura= 1000;
-context.beginPath();
-context.save();
-context.translate(canvas.width / 3, altura-1*this.getTime() /10);
-context.scale(widthScale, heightScale);
-context.arc(0, 0, 65, 0, 2 * Math.PI, false);
-context.restore();
-context.fillStyle ="rgba(0, 0, 0, 0.2)";
+
 var img = new Image();
 img.src = 'imgs/pez.gif';
-context.drawImage(img, mouseX/2, mouseY/2);
-//context.fillStyle = "#EBf4FA";// estilo blanco burubuja
-context.fill();
-context.lineWidth = 2;
-context.strokeStyle = "#555";
-context.stroke();
-context.beginPath();
-context.save();
-context.translate(canvas.width / 2, altura-100-1*this.getTime() /10);
-context.scale(widthScale, heightScale);
-context.arc(0, 0, 65, 0, 2 * Math.PI, false);
-context.restore();
-context.fillStyle ="rgba(0, 0, 0, 0.2)";
-//context.fillStyle = "#EBf4FA";// estilo blanco burubuja
-context.fill();
-context.lineWidth = 2;
-context.strokeStyle = "#555";
-context.stroke();
+
+if(diferencia < 10 && diferencia > -10){
+  document.getElementById("explosion").innerHTML = "<img src='imgs/explosion1.gif' alt='COCODRILOOOOOOOOO'/>";
+  document.getElementById("explosion").style.top=altura-1*this.getTime() /10 + "px";
+  document.getElementById("explosion").style.left=burbujaX /10 - 100 + "px";
+
+}else{
+  context.beginPath();
+  context.save();
+  context.translate(burbujaX, altura-1*this.getTime() /10);
+  context.scale(widthScale, heightScale);
+  context.arc(0, 0, 65, 0, 2 * Math.PI, false);
+  context.restore();
+  context.fillStyle ="rgba(0, 0, 0, 0.2)";
+  context.stroke();
+
+}
+
+coordenadas={x:mouseX/2,
+  y: mouseY/2
+}
+socketClient.emit('pintar', { id: socketClient.id, coordenadas: coordenadas });
+socketClient.on('pintando', function(data){
+datox = data;
+  //userX=JSON.stringify(data.x);
+  //userY=JSON.stringify(data.y);
+})
+
+
+if(datox){
+  Object.keys(datox).forEach(function(key) {
+  dibujar(context,img,datox[key]);
+  });
+}
+
 context.beginPath();
 context.save();
 context.translate(canvas.width / 3, altura-1*this.getTime() /10);
@@ -206,12 +254,15 @@ function arrancar(){
       }, false);
 }arrancar();
 
+function dibujar(context,img,datox){
+return context.drawImage(img, datox.x, datox.y);
+
+}
 
 
 var $setNick = $('#setNick');
 var $pasarTurno = $('#pasarTurno');
 var $nickJugador;
-var socketClient = io.connect();
 var $celda =  $("#tablero td");
 var $ficha = $("#tablero td");
 var $targetCelda;

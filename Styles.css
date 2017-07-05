@@ -103,9 +103,21 @@ height: 50px;
   position:relative; z-index:5;
 
 }
-#setNick{
+#messageChatBox{
   position:relative; z-index:5;
 
+}
+#viñeta{
+  background-image: url("imgs/viñeta.png");
+  background-repeat: no-repeat;
+  background-size: 50%;
+  position:relative;
+   z-index:5;
+}
+#mensaje{
+    position:relative;
+  top:-50px;
+    right:40px;
 }
 #tablero tr:nth-child(odd) td:nth-child(even){
   text-shadow: 1px 1px 0px #333,
