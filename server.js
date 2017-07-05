@@ -41,6 +41,18 @@ Object.keys(listaJugadores).forEach(function(key) {
   socket.on('mandarMensaje', function(data) {
     io.sockets.emit('comunicar', data);
   });
+  socket.on('disconnect', function(data) {
+
+    Object.keys(listaJugadores).forEach(function(key) {
+      if (listaJugadores[key].id == socket.id) {
+        console.log(listaJugadores[key])
+        delete listaJugadores[key];
+        console.log(listaJugadores[key])
+        io.sockets.emit('pintando', listaJugadores);
+      }
+    });
+
+ });
   socket.on('crear jugador', function(data) {
       socket.nickJugador=data;
       if(jugador.blancas == ''){
